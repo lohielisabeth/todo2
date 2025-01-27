@@ -1,54 +1,65 @@
-import React from 'react';
-import { TextInput, Button, View, StyleSheet } from 'react-native';
 
-const TaskInput = ({ value, onChangeText, onAddTask }) => {
+import React, { useState } from 'react';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const TaskInput = ({ tasks, setTasks }) => {
+  const [newTask, setNewTask] = useState('');
+
+  const handleAddTask = async () => {
+    if (newTask.trim()) {
+      const newTaskObject = { id: Date.now(), task: newTask, done: false };
+      const updatedTasks = [...tasks, newTaskObject];
+      setTasks(updatedTasks);
+      await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      setNewTask('');
+    }
+  };
+
   return (
-    <View style={styles.inputContainer}>
-      {/* Tekstikenttä uuden tehtävän lisäämiseen */}
+    <View style={styles.inputRow}>
       <TextInput
+        value={newTask}
+        onChangeText={setNewTask}
         style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
         placeholder="Add a new task"
       />
-      <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          { alignSelf: 'flex-end' }, // Napin sijoittaminen oikealle
-          pressed && { opacity: 0.7 }, // Visuaalinen muutos painettaessa
-        ]}
-        onPress={onAddTask}
-      >
-        <Text style={styles.buttonText}>Add Task</Text>
-      </Pressable>
+      <TouchableOpacity onPress={handleAddTask} style={styles.saveButton}>
+        <Text style={styles.saveButtonText}>Save</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-    inputContainer: {
-      flexDirection: 'row',        // Asettaminen vierekkäin
-      alignItems: 'center',        // Keskitetään pystysuunnassa
-      marginBottom: 20,            // Väli muiden komponenttien kanssa
+    inputRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between', 
+      alignItems: 'center',
+      marginBottom: 20,
     },
     input: {
-      flex: 1,                     // Tekstikenttä vie kaiken tilan vasemmalla
       height: 40,
       borderColor: '#ccc',
       borderWidth: 1,
-      marginRight: 10,             // Väli napin ja kentän välillä
       paddingLeft: 8,
+      flex: 1,
     },
-    button: {
-      backgroundColor: '#6200ea',  // Napin taustaväri
-      paddingVertical: 10,         // Napin pystysuora täyttö
-      paddingHorizontal: 20,       // Napin vaakasuora täyttö
-      borderRadius: 5,             // Kulmat pyöristetään
+    saveButton: {
+      backgroundColor: 'lightblue',
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      borderRadius: 5,
+      marginLeft: 10,
+      height: 40, 
+      justifyContent: 'center',  
+      alignItems: 'center', 
     },
-    buttonText: {
-      color: 'white',              // Tekstin väri napissa
-      fontSize: 16,                // Tekstin koko
+    saveButtonText: {
+      color: 'white',
+      fontWeight: 'bold',
     },
   });
-
-export default TaskInput;
+  
+  export default TaskInput;
+  

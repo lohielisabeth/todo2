@@ -1,18 +1,27 @@
 import React from 'react';
-import { FlatList, View } from 'react-native';
+import { FlatList, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import TaskItem from './taskItem';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const TaskList = ({ tasks, toggleTask }) => {
+const TaskList = ({ tasks, setTasks }) => {
+  const toggleTask = async (taskId) => {
+    const updatedTasks = tasks.map((task) =>
+      task.id === taskId ? { ...task, done: !task.done } : task
+    );
+    setTasks(updatedTasks);
+    await AsyncStorage.setItem('tasks', JSON.stringify(updatedTasks));
+  };
+
   return (
-    <View>
-      <FlatList
-        data={tasks}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
+    <FlatList
+      data={tasks}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => (
+        <View>
           <TaskItem task={item} onPress={() => toggleTask(item.id)} />
-        )}
-      />
-    </View>
+        </View>
+      )}
+    />
   );
 };
 
